@@ -10,12 +10,16 @@ function RegisterPage(){
 
     const[error, setError] = useState({
         name : '',
-        email : '',
         dob : '',
         pass : '',
         passC : ''
     });
     const[success, setSuccess] = useState('');
+
+    const hasLength = pass.length>=8;
+    const hasUpper = /[A-Z]/.test(pass);
+    const hasNumber = /[0-9]/.test(pass);
+    const hasSpecial = /[^A-Za-z0-9]/.test(pass);
     
     function handleRegister(event : SyntheticEvent<HTMLFormElement>){
         // const email = (document.getElementById("email") as HTMLInputElement).value;
@@ -24,44 +28,48 @@ function RegisterPage(){
         // const passC = (document.getElementById("passC") as HTMLInputElement).value; 
         // this is not advisable, because this takes values directly from DOM which is imperative for obtaining dynamically changing values
         event.preventDefault();
-        setError({name : '', email : '', dob : '', pass : '', passC : ''});
+
+        setError({name : '', dob : '', pass : '', passC : ''});
         setSuccess('');
+
         const trimmedName = name.trim();
         const date = new Date()
         const cuttOffDate = new Date(date.getFullYear()-18, date.getMonth(), date.getDate());
         const birthday = new Date(dob);
+
+
         if(trimmedName === "" || trimmedName.length<3 || /[^a-zA-Z -']/.test(trimmedName)) {
-            setError({...error, name : "Invalid Name"});
+            setError(prev => ({...prev, name : "Invalid Name"}));
             return;
         }
 
         if(cuttOffDate < birthday){
-            setError({...error, dob : "You must be at least 18 years old"});
+            setError(prev => ({...prev, dob : "You must be at least 18 years old"}));
             return;
         }
         
-        if(pass.length<8){
-            setError({...error, pass :'Password must be atleast 8 characters long'});
+        if(!hasLength){
+            setError(prev => ({...prev, pass :'Password must be at least 8 characters long'}));
             return;
         }
 
-        if(!/[A-Z]/.test(pass)){
-            setError({...error, pass :'Password must contain atleast one UpperCase'});
+        if(!hasUpper){
+            setError(prev => ({...prev, pass :'Password must contain at least one UpperCase'}));
             return;
         }
 
-        if(!/[0-9]/.test(pass)){
-            setError({...error, pass : 'Password must contain atleast one Number'});
+        if(!hasNumber){
+            setError(prev => ({...prev, pass : 'Password must contain at least one Number'}));
             return;
         }
 
-        if(!/[^A-Za-z0-9]/.test(pass)){
-            setError({...error, pass : 'Password must contain atleast one Special Character'});
+        if(!hasSpecial){
+            setError(prev => ({...prev, pass : 'Password must contain at least one Special Character'}));
             return;
         }
 
         if(pass!==passC){
-            setError({...error, passC : 'Passwords don\'t Match'});
+            setError(prev => ({...prev, passC : 'Passwords don\'t Match'}));
             return;
         }
         
@@ -69,25 +77,32 @@ function RegisterPage(){
     }
 
     return(
-        <div>
+        <div className="min-h-screen flex items-center justify-center">
             <Link to='/'>back</Link>
             <h1>Registration Page</h1>
             <form onSubmit={handleRegister}>
                 <label htmlFor='name'>Name :</label>
                 <input type='text' id='name' onChange={(event) => setName(event.target.value)} value={name} required/>
-                {error && <p>{error.name}</p>}<br />
+                {error.name && <p>{error.name}</p>}<br />
                 <label htmlFor='email'>Email address :</label>
-                <input type='email' id='email' onChange={(event) => setEmail(event.target.value)} value={email} required/>
-                {error && <p>{error.email}</p>}<br />
+                <input type='email' id='email' onChange={(event) => setEmail(event.target.value)} value={email} required/><br/>
                 <label htmlFor='dob'>Date of Birth :</label>
                 <input type='date' id='dob' onChange={(event) => setDOB(event.target.value)} value={dob} required/>
-                {error && <p>{error.dob}</p>}<br/>
+                {error.dob && <p>{error.dob}</p>}<br/>
                 <label htmlFor='pass'>Password :</label>
                 <input type='password' id='pass' onChange={(event) => setPass(event.target.value)} value={pass} required/>
-                {error && <p>{error.pass}</p>}<br/>
+                    {pass && (
+                        <>
+                            <p>{hasLength ? '✅' : '❌' } : Password Length</p>
+                            <p>{hasUpper ? '✅' : '❌' } : Contains At least one Upper Case</p>
+                            <p>{hasNumber ? '✅' : '❌' } : Contains At least one Number</p>
+                            <p>{hasSpecial ? '✅' : '❌' } : Contiains At least one Special Character </p>
+                        </>
+                    )}
+                {error.pass && <p>{error.pass}</p>}<br/>
                 <label htmlFor='passC'>Confirm Password :</label>
                 <input type='password' id='passC' onChange={(event) => setPassC(event.target.value)} value={passC} required/>
-                {error && <p>{error.passC}</p>}<br/>
+                {error.passC && <p>{error.passC}</p>}<br/>
                 <button type='submit'>Register</button>
             </form>
             {success && <p>{success}</p>}
