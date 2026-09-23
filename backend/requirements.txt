@@ -5,3 +5,4 @@ psycopg
 alembic
 pydantic[email]
 pwdlib
+python-dotenv
